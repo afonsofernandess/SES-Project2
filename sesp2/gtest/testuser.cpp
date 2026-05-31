@@ -21,27 +21,22 @@ TEST(test_user, valid_user2) {
 
 // etc ...
 
-// Test that 'z' is valid (Bug  — <= vs <)
 TEST(test_user, valid_user_with_z) {
   ASSERT_EQ(PWM_OK, pwm_is_valid_user("abcz"));
 }
 
-// Test that exactly 4 chars is valid (minimum boundary)
 TEST(test_user, min_length_valid) {
   ASSERT_EQ(PWM_OK, pwm_is_valid_user("abcd"));
 }
 
-// Test that 3 chars is rejected (below minimum)
 TEST(test_user, too_short) {
   ASSERT_EQ(PWM_INVALID_USER_ID, pwm_is_valid_user("abc"));
 }
 
-// Test that 11 chars is rejected (above maximum)
 TEST(test_user, too_long) {
   ASSERT_EQ(PWM_INVALID_USER_ID, pwm_is_valid_user("abcdefghijk"));
 }
 
-// Test that uppercase letters in the middle are rejected
 TEST(test_user, invalid_uppercase) {
   ASSERT_EQ(PWM_INVALID_USER_ID, pwm_is_valid_user("abcD"));
 }

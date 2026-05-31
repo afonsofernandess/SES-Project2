@@ -1,5 +1,5 @@
-libdir=/home/eduardorbmarques/ses2526/gtest/lib
-includedir=/home/eduardorbmarques/ses2526/gtest/include
+libdir=/home/afonso/Desktop/MSI/2semester/SES/project2/SES-Project2/sesp2/gtest/library/lib
+includedir=/home/afonso/Desktop/MSI/2semester/SES/project2/SES-Project2/sesp2/gtest/library/include
 
 Name: gmock_main
 Description: GoogleMock (with main() function)
