@@ -1,0 +1,28 @@
+PWM command (e.g. 'help') [1]: >> Command: 'help' [ 'delete' ]
+  delete <user> : delete user
+<< 'help' -- success.
+PWM command (e.g. 'help') [2]: >> Command: 'init' [ 'password.txt' 'Qses1920' ]
+<< 'init' -- success.
+PWM command (e.g. 'help') [3]: >> Command: 'add' [ 'robot' '212!3456' ]
+PWM error! Invalid password '212!3456'!
+<< 'add' -- failure (error code 8) !
+PWM command (e.g. 'help') [4]: >> Command: 'add' [ 'bobbyv' 'qses' ]
+PWM error! Invalid password 'qses'!
+<< 'add' -- failure (error code 8) !
+PWM command (e.g. 'help') [5]: >> Command: 'add' [ 'bobbyl' '0abcdef.' ]
+PWM error! Invalid password '0abcdef.'!
+<< 'add' -- failure (error code 8) !
+PWM command (e.g. 'help') [6]: >> Command: 'add' [ 'alicea' '.Aa3456' ]
+<< 'add' -- success.
+PWM command (e.g. 'help') [7]: >> Command: 'add' [ 'bobby' 'HAa3456' ]
+<< 'add' -- success.
+PWM command (e.g. 'help') [8]: >> Command: 'list' [ ]
+In memory-contents for 'password.txt'
+admin:f5a5af7e:9b046a8c96ef41b4673bcfea42db4093
+alicea:be5d3b70:8abda9ffe85ed66dd266c822dd08bc50
+bobby:7a0bb647:5e2445906ddb900001cfa047bd7a8981
+3 users
+<< 'list' -- success.
+PWM command (e.g. 'help') [9]: >> Command: 'clear' [ ]
+<< 'clear' -- success.
+PWM command (e.g. 'help') [10]: 
