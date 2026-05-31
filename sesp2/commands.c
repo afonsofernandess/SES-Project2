@@ -68,7 +68,7 @@ pwm_res_t pwm_handle_command
   printf(">> Command: '%s' [", command); 
   for (j = 0; j < n_args; j++) { 
      printf(" '"); 
-     printf(command_args[j]);
+     printf("%s", command_args[j]);
      printf("'"); 
   }
   printf(" ]\n");
@@ -258,7 +258,7 @@ void pwm_interactive_session() {
   while(1) {
     printf("PWM command (e.g. 'help') [%d]: ", line_count);
     fflush(stdout);
-    if (gets(line) == NULL) {
+    if (fgets(line, sizeof(line), stdin) == NULL) {
       break; // EOF detected
     }
     line_count++;
