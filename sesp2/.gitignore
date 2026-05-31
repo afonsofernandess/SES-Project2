@@ -1,9 +1,0 @@
-*.o
-pwm
-*.plist
-*.gcda
-*.gcno 
-*.gcov 
-leak-* 
-crash-*
-pwnsafe

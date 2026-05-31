@@ -20,10 +20,10 @@ pwm_res_t pwm_is_valid_user(const char* user) {
   int r = PWM_INVALID_USER_ID;
   int i;
   char c;
-  if (len >= PWM_MIN_USER_ID_LEN && len < PWM_MAX_USER_ID_LEN) {
-    for (i = 1; i < len; i++) {
+  if (len >= PWM_MIN_USER_ID_LEN && len <= PWM_MAX_USER_ID_LEN) {
+    for (i = 0; i < len; i++) {
       c = user[i];
-      if (c < 'a' || c >= 'z') {
+      if (c < 'a' || c > 'z') {
         break;
       }
     }
@@ -60,13 +60,13 @@ pwm_res_t pwm_is_valid_password(const char* password) {
   int len = strlen(password);
   
   // Length check
-  if (   len <= PWM_MIN_PASSWORD_LEN 
-      || len >= PWM_MAX_PASSWORD_LEN) {
+  if (   len < PWM_MIN_PASSWORD_LEN 
+      || len > PWM_MAX_PASSWORD_LEN) {
       return PWM_INVALID_PASSWORD;
   }
 
   // Black-list check 
-  for (int i = 1; 
+  for (int i = 0; 
        i < BLACK_LIST_SIZE; 
        i++) {
     if (strcasestr(password, BLACK_LIST[i]) != 0) {
@@ -77,7 +77,7 @@ pwm_res_t pwm_is_valid_password(const char* password) {
   int u = 0, l = 0, d = 0, p = 0;
 
   for (int i = 0; 
-       i <= len; 
+       i < len; 
        i++) {
     char c = password[i];
     if (   c >= 'a' 
@@ -91,12 +91,12 @@ pwm_res_t pwm_is_valid_password(const char* password) {
     } 
     else 
     if (   c >= '0' 
-        || c <= '9') {
+        && c <= '9') {
       d++;
     } 
     else 
     if (strchr(".:,!?", c) != NULL) {
-      if (p == 0) {
+      if (p == 1) {
         return PWM_INVALID_PASSWORD;
       } 
       else {
@@ -104,7 +104,7 @@ pwm_res_t pwm_is_valid_password(const char* password) {
       }
     }
     else { 
-      return PWM_OK;
+      return PWM_INVALID_PASSWORD;
     }
   }
   if (   l == 0 
