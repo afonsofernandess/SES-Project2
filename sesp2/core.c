@@ -10,7 +10,8 @@
 
 static pwm_node_t* create_node(char* user, salt_t salt, hash_t hash) {
   pwm_node_t* node = (pwm_node_t*) malloc(sizeof(pwm_node_t));
-  strcpy(node -> user, user);
+  strncpy(node -> user, user, sizeof(node -> user) - 1);
+  node -> user[sizeof(node -> user) - 1] = '\0';
   memcpy(node -> salt, salt, sizeof(node -> salt));
   memcpy(node -> hash, hash, sizeof(node -> hash));
   node -> next = NULL;
@@ -202,8 +203,9 @@ pwm_res_t pwm_delete(PWM pwm, char* user) {
       r = PWM_USER_NOT_FOUND;
       pwm_error("User '%s' does not exist!", user);
     } else {
-      free(node -> next);
-      node -> next = node -> next -> next;
+      pwm_node_t* temp = node -> next;
+      node -> next = temp -> next;
+      free(temp);
     } 
   }
   return r;
