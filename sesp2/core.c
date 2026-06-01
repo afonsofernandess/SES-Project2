@@ -56,6 +56,7 @@ pwm_res_t pwm_free(PWM pwm) {
     node = node -> next;
     free(aux);
   }
+  free(pwm -> file);
   free(pwm);
   return PWM_OK;
 }
