@@ -16,4 +16,34 @@ PWM command (e.g. 'help') [2]: >> Command: 'init' [ 'password.txt' 'Qses1920' ]
 << 'init' -- success.
 PWM command (e.g. 'help') [3]: >> Command: 'add' [ 'robota' 'Aa3456' ]
 << 'add' -- success.
-PWM command (e.g. 'help') [4]: 
+PWM command (e.g. 'help') [4]: >> Command: 'adlp' [ ]
+PWM error! Unrecognized command: 'adlp'!
+<< 'adlp' -- failure (error code 4) !
+PWM command (e.g. 'help') [5]: >> Command: 'init' [ 'password.txt' 'Qses1920' ]
+PWM error! PWM data not saved! Use 'clear' or 'save' first!
+<< 'init' -- failure (error code 2) !
+PWM command (e.g. 'help') [6]: >> Command: 'add' [ 'robota' 'Aa3456' ]
+PWM error! User 'robota' already exists!
+<< 'add' -- failure (error code 6) !
+PWM command (e.g. 'help') [7]: >> Command: 'add' [ 'roboty' 'ZZ3456789012:' ]
+PWM error! Invalid password 'ZZ3456789012:'!
+<< 'add' -- failure (error code 8) !
+PWM command (e.g. 'help') [8]: >> Command: 'add' [ 'edward' '65536' ]
+PWM error! Invalid password '65536'!
+<< 'add' -- failure (error code 8) !
+PWM command (e.g. 'help') [9]: >> Command: 'add' [ 'charlesz' 'TZz3456789012' ]
+PWM error! Invalid password 'TZz3456789012'!
+<< 'add' -- failure (error code 8) !
+PWM command (e.g. 'help') [10]: >> Command: 'add' [ 'bobbyt' '.Aa3456' ]
+<< 'add' -- success.
+PWM command (e.g. 'help') [11]: >> Command: 'list' [ ]
+In memory-contents for 'password.txt'
+admin:34e2ae1a:04ecb13024beb520a3fa65997c6a3a10
+robota:dcd823a5:2691c0a05ae867863699195496ac6765
+bobbyt:c418905b:bc7d55f2fd0d80ab6a098c4ca352e985
+3 users
+<< 'list' -- success.
+PWM command (e.g. 'help') [12]: >> Command: 'clear' [ ]
+<< 'clear' -- success.
+PWM command (e.g. 'help') [13]: >> Command: 'quit' [ ]
+<< 'quit' -- success.

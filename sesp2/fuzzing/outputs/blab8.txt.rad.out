@@ -20,9 +20,10 @@ PWM error! Invalid password '1234567890124'!
 << 'add' -- failure (error code 8) !
 PWM command (e.g. 'help') [8]: >> Command: 'list' [ ]
 In memory-contents for 'password.txt'
-admin:c951d1c4:d54548ce315b0ba6e6ed9656abdb904e
+admin:d799562b:dcbdafd8a3e3c843205172074ff383d7
 1 users
 << 'list' -- success.
 PWM command (e.g. 'help') [9]: >> Command: 'clear' [ ]
 << 'clear' -- success.
-PWM command (e.g. 'help') [10]: 
+PWM command (e.g. 'help') [10]: >> Command: 'quit' [ ]
+<< 'quit' -- success.

@@ -16,10 +16,11 @@ PWM error! Invalid password 'xqses'!
 << 'add' -- failure (error code 8) !
 PWM command (e.g. 'help') [7]: >> Command: 'list' [ ]
 In memory-contents for 'password.txt'
-admin:0590db32:e07645d665190d94695473fc152d2ccb
-ziggyz:6632556c:acfe5938547e69686c51d387543b2039
+admin:c099615a:b8cd0c7a3513490149ffdc1c0d2ce288
+ziggyz:ad510066:715ce93d4df2bba5537b5329a685afec
 2 users
 << 'list' -- success.
 PWM command (e.g. 'help') [8]: >> Command: 'clear' [ ]
 << 'clear' -- success.
-PWM command (e.g. 'help') [9]: 
+PWM command (e.g. 'help') [9]: >> Command: 'quit' [ ]
+<< 'quit' -- success.

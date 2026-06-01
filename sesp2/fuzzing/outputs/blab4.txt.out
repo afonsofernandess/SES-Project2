@@ -31,9 +31,10 @@ PWM error! Invalid password 'abcdef.3'!
 << 'add' -- failure (error code 8) !
 PWM command (e.g. 'help') [8]: >> Command: 'list' [ ]
 In memory-contents for 'password.txt'
-admin:9c0d9167:6ea537e6efb38d43022a312b1560e5b7
+admin:dd2702c7:7d4a5c0cadd075d92c376f522b4c7d5b
 1 users
 << 'list' -- success.
 PWM command (e.g. 'help') [9]: >> Command: 'clear' [ ]
 << 'clear' -- success.
-PWM command (e.g. 'help') [10]: 
+PWM command (e.g. 'help') [10]: >> Command: 'quit' [ ]
+<< 'quit' -- success.

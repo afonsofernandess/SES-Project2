@@ -19,4 +19,11 @@ PWM error! No PWM data in memory! Use 'init' or 'open' first!
 PWM command (e.g. 'help') [7]: >> Command: 'add' [ 'charles' 'Zz3456789012' ]
 PWM error! No PWM data in memory! Use 'init' or 'open' first!
 << 'add' -- failure (error code 1) !
-PWM command (e.g. 'help') [8]: 
+PWM command (e.g. 'help') [8]: >> Command: 'list' [ ]
+PWM error! No PWM data in memory! Use 'init' or 'open' first!
+<< 'list' -- failure (error code 1) !
+PWM command (e.g. 'help') [9]: >> Command: 'clear' [ ]
+PWM error! No PWM data in memory! Use 'init' or 'open' first!
+<< 'clear' -- failure (error code 1) !
+PWM command (e.g. 'help') [10]: >> Command: 'quit' [ ]
+<< 'quit' -- success.

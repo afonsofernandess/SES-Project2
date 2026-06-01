@@ -18,11 +18,12 @@ PWM command (e.g. 'help') [7]: >> Command: 'add' [ 'bobby' 'HAa3456' ]
 << 'add' -- success.
 PWM command (e.g. 'help') [8]: >> Command: 'list' [ ]
 In memory-contents for 'password.txt'
-admin:f5a5af7e:9b046a8c96ef41b4673bcfea42db4093
-alicea:be5d3b70:8abda9ffe85ed66dd266c822dd08bc50
-bobby:7a0bb647:5e2445906ddb900001cfa047bd7a8981
+admin:e29c7e35:46e5745cfce46856a0b2630f80b53cee
+alicea:28bc4eab:cd530ca6cc83f20c14225cf14bb292a5
+bobby:bc5fac84:c671e9f68397f9cbdb46cb16a235ba77
 3 users
 << 'list' -- success.
 PWM command (e.g. 'help') [9]: >> Command: 'clear' [ ]
 << 'clear' -- success.
-PWM command (e.g. 'help') [10]: 
+PWM command (e.g. 'help') [10]: >> Command: 'quit' [ ]
+<< 'quit' -- success.

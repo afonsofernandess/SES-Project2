@@ -29,11 +29,12 @@ PWM error! User 'bobbyi' already exists!
 << 'add' -- failure (error code 6) !
 PWM command (e.g. 'help') [8]: >> Command: 'list' [ ]
 In memory-contents for 'password.txt'
-admin:29647e8b:f533ad1283c03c7239f3ec1334f83241
-bobby:d552f824:6d1c97210a57cc36c56e6fdd16d2d74f
-bobbyi:0029c6c5:e2daa2e3ef4dd4cbfe557b1efb0dc996
+admin:809430e7:0a31ae9ba34d1ba12ee9c78309bce617
+bobby:eb84c877:21842fa543e4a21cfd8b2af55ed94c78
+bobbyi:d77820a1:600c3db6443899b5ad48a074d7d94e68
 3 users
 << 'list' -- success.
 PWM command (e.g. 'help') [9]: >> Command: 'clear' [ ]
 << 'clear' -- success.
-PWM command (e.g. 'help') [10]: 
+PWM command (e.g. 'help') [10]: >> Command: 'quit' [ ]
+<< 'quit' -- success.

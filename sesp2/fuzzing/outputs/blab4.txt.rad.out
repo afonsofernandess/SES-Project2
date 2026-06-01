@@ -15,4 +15,27 @@ Available commands:
 PWM command (e.g. 'help') [2]: >> Command: 'add' [ 'ziggy' 'hZZ3456789012' ]
 PWM error! No PWM data in memory! Use 'init' or 'open' first!
 << 'add' -- failure (error code 1) !
-PWM command (e.g. 'help') [3]: 
+PWM command (e.g. 'help') [3]: >> Command: 'list' [ ]
+PWM error! No PWM data in memory! Use 'init' or 'open' first!
+<< 'list' -- failure (error code 1) !
+PWM command (e.g. 'help') [4]: >> Command: 'clear' [ ]
+PWM error! No PWM data in memory! Use 'init' or 'open' first!
+<< 'clear' -- failure (error code 1) !
+PWM command (e.g. 'help') [5]: >> Command: 'add' [ 'charless' 'aa34569' ]
+PWM error! No PWM data in memory! Use 'init' or 'open' first!
+<< 'add' -- failure (error code 1) !
+PWM command (e.g. 'help') [6]: >> Command: 'add' [ 'charles' '4294967284!170141183460469231731687303715884109183O' ]
+PWM error! No PWM data in memory! Use 'init' or 'open' first!
+<< 'add' -- failure (error code 1) !
+PWM command (e.g. 'help') [7]: >> Command: 'add' [ 'adminp' 'abcdef.3' ]
+PWM error! No PWM data in memory! Use 'init' or 'open' first!
+<< 'add' -- failure (error code 1) !
+PWM command (e.g. 'help') [8]: >> Command: 'add' [ 'ziggy' 'ZZ0' ]
+PWM error! No PWM data in memory! Use 'init' or 'open' first!
+<< 'add' -- failure (error code 1) !
+PWM command (e.g. 'help') [9]: >> Command: 'init' [ 'password.txt' 'Qses1920' ]
+<< 'init' -- success.
+PWM command (e.g. 'help') [10]: >> Command: 'quit' [ ]
+PWM error! PWM data not saved! Use 'clear' or 'save' first!
+<< 'quit' -- failure (error code 2) !
+PWM command (e.g. 'help') [11]: 

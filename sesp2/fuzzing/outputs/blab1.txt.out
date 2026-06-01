@@ -19,10 +19,11 @@ PWM command (e.g. 'help') [7]: >> Command: 'add' [ 'charles' 'Zz3456789012' ]
 << 'add' -- success.
 PWM command (e.g. 'help') [8]: >> Command: 'list' [ ]
 In memory-contents for 'password.txt'
-admin:87524f36:6abb9ed512b74dfcfb69f91f422a0f64
-charles:0101bc8e:ebc6beecbca61c22c7a0604cf6c1e180
+admin:82d606e1:af2bf41852d5a18ed4db60d165a24221
+charles:9d5eda86:c01ce8029cc6d0f64e3a7e84df4f95b3
 2 users
 << 'list' -- success.
 PWM command (e.g. 'help') [9]: >> Command: 'clear' [ ]
 << 'clear' -- success.
-PWM command (e.g. 'help') [10]: 
+PWM command (e.g. 'help') [10]: >> Command: 'quit' [ ]
+<< 'quit' -- success.
