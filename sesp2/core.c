@@ -118,6 +118,12 @@ pwm_res_t pwm_open(char* file, char* password, PWM* pwm) {
            pwm_error("Password mismatch for admin user!");
            break;
          }
+         if (strcmp(node->user, PWM_ADMIN_USER) != 0) {
+            r = PWM_FILE_CORRUPT;
+            pwm_error("First entry is not admin user!");
+            free(node);
+            break;
+          }
          (*pwm) -> entries = node;
        } else {
          curr -> next = node;
