@@ -23,7 +23,7 @@ static pwm_res_t create_node_p(char* user, char* password, pwm_node_t** node) {
    hash_t hash;
    pwm_res_t r = PWM_OK;
    if ( (r = pwm_generate_salt(salt)) == PWM_OK
-       && (r = pwm_hash_password(salt, password, hash)) == PWM_OK) {
+       && (r = pwm_hash_password(user,salt, password, hash)) == PWM_OK) {
       *node = create_node(user, salt, hash);
    }
    return r;
@@ -112,7 +112,7 @@ pwm_res_t pwm_open(char* file, char* password, PWM* pwm) {
        node = create_node(user, salt, hash);
        if (count == 1) {
          hash_t vhash;
-         pwm_hash_password(node -> salt, password, vhash);
+         pwm_hash_password(node -> user, node -> salt, password, vhash);
          if (memcmp(node -> hash, vhash, sizeof(hash_t)) != 0) {
            r = PWM_PASSWORD_MISMATCH;
            pwm_error("Password mismatch for admin user!");
@@ -148,7 +148,7 @@ pwm_res_t pwm_update(PWM pwm, char* user, char* password) {
         salt_t salt;
         hash_t hash;
         if ( (r = pwm_generate_salt(salt)) == PWM_OK
-           && (r = pwm_hash_password(salt, password, hash)) == PWM_OK) {
+           && (r = pwm_hash_password(user, salt, password, hash)) == PWM_OK) {
           memcpy(node -> salt, salt, sizeof(salt));
           memcpy(node -> hash, hash, sizeof(hash));
         }
@@ -263,7 +263,7 @@ pwm_res_t pwm_match(PWM pwm, char* user, char* password) {
     r = PWM_USER_NOT_FOUND;
   } 
   else 
-  if ((r = pwm_hash_password(node -> salt, password, hash)) == PWM_OK) {
+  if ((r = pwm_hash_password(user, node -> salt, password, hash)) == PWM_OK) {
     if (memcmp(node -> hash, hash, sizeof(hash_t)) != 0) {
       pwm_error("Password mismatch for user '%s'!", user);
       r = PWM_PASSWORD_MISMATCH; 
