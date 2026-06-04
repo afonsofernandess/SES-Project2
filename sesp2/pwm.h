@@ -44,6 +44,10 @@ typedef unsigned char hash_t[16];
 // Admin user name
 #define PWM_ADMIN_USER "admin"
 
+// AEAD definitions
+#define AES_TAG 16
+#define AES_IV 12
+
 // Data structures for internal representation
 typedef struct _pwm_node_t {
   char user[PWM_MAX_USER_ID_LEN + 1];
@@ -54,6 +58,7 @@ typedef struct _pwm_node_t {
 
 struct _pwm_t {
    char* file;
+   unsigned char key[32];
    pwm_node_t* entries;
 };
 typedef struct _pwm_t* PWM;
@@ -92,6 +97,8 @@ void pwm_print_hex_string(FILE* fp, unsigned char* data, int length);
 int pwm_split_line
 (char* string, char separator, char** fields, int max_fields);
 
+void pwn_derive_key(const char* password, unsigned char* key);
+void pwn_store_hex_string(char* str, unsigned char* data, int length);
 void pwm_error(const char* fmt, ...);
 
 #ifdef __cplusplus

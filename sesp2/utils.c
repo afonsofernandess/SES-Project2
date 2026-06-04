@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include "pwm.h"
 #include "md5.h"
+#include <openssl/sha.h>
 
 
 int pwm_split_line
@@ -89,6 +90,18 @@ void pwm_print_hex_string(FILE* fp, unsigned char* data, int length) {
   for (i = 0; i < length; i++) {
     fprintf(fp, "%02x", data[i]);
   }
+}
+
+void pwn_store_hex_string(char* str, unsigned char* data, int length) {
+  int i;
+  for (i = 0; i < length; i++) {
+    sprintf(str + 2*i, "%02x", data[i]);
+  }
+  str[2*length] = '\0';
+}
+
+void pwn_derive_key(const char* password, unsigned char* key) {
+  SHA256((unsigned char*) password, strlen(password), key);
 }
 
 void pwm_error(const char* format, ...) {

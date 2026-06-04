@@ -3,7 +3,7 @@ CC=gcc
 
 CFLAGS +=  -g -fsanitize=address -fprofile-arcs -ftest-coverage 
 
-LDFLAGS=-fsanitize=address  -fprofile-arcs -ftest-coverage 
+LDFLAGS=-fsanitize=address  -fprofile-arcs -ftest-coverage -lcrypto
 
 PWM_OBJS=pwm.o commands.o core.o utils.o md5.o validation.o 
 

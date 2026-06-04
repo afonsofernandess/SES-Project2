@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
 // #include <bsd/string.h>
 
 // PWM header
@@ -70,72 +72,168 @@ pwm_res_t pwm_init(char* file, char* password, PWM* pwm) {
   if ((r = pwm_alloc(file, pwm)) != PWM_OK) {
     return r;
   }
+  // adiciona aqui a chave para encriptar e desencriptar
+  pwn_derive_key(password, (*pwm)->key);
   return create_node_p(PWM_ADMIN_USER, password, &((*pwm) -> entries));
 }
 
 pwm_res_t pwm_open(char* file, char* password, PWM* pwm) {
   pwm_res_t r = PWM_OK;
-  FILE* f = fopen(file, "r");
+  FILE* f = fopen(file, "rb");
   if (f == NULL) {
     *pwm = NULL;
     r = PWM_FILE_INACESSIBLE;
     perror(file);
     pwm_error("Could not open file '%s' for reading!", file);
   } else if ((r = pwm_alloc(file, pwm)) == PWM_OK) {
-     char line[1024];
-     int count = 0;
-     pwm_node_t* curr;
-     while (fgets(line, sizeof(line), f) != NULL) {
-       char* line_fields[3];
-       char* user, *salt_str, *hash_str;
-       salt_t salt; hash_t hash;
-       pwm_node_t* node;
-       count++;
-       if (pwm_split_line(line, ':', line_fields, 3) != 3) {
-         pwm_error("Corrupt file '%s' at line %d [entries] !", (*pwm)->file, count+1);
-         r = PWM_FILE_CORRUPT;
-         break;
-       }
-       user = line_fields[0];
-       salt_str = line_fields[1];
-       hash_str = line_fields[2];
-       if (! pwm_decode_hex_string(salt_str, salt, sizeof(salt_t))) {
-         pwm_error("Corrupt file '%s' at line %d [salt] !", (*pwm)->file, count+1);
-         r = PWM_FILE_CORRUPT;
-         break;
-       }
-       if (! pwm_decode_hex_string(hash_str, hash, sizeof(hash_t))) {
-         pwm_error("Corrupt file '%s' at line %d [hash] !", (*pwm)->file, count+1);
-         r = PWM_FILE_CORRUPT;
-         break;
-       }
-       node = create_node(user, salt, hash);
-       if (count == 1) {
-         hash_t vhash;
-         pwm_hash_password(node -> user, node -> salt, password, vhash);
-         if (memcmp(node -> hash, vhash, sizeof(hash_t)) != 0) {
-           r = PWM_PASSWORD_MISMATCH;
-           pwm_error("Password mismatch for admin user!");
-           break;
-         }
-         if (strcmp(node->user, PWM_ADMIN_USER) != 0) {
-            r = PWM_FILE_CORRUPT;
-            pwm_error("First entry is not admin user!");
-            free(node);
-            break;
-          }
-         (*pwm) -> entries = node;
-       } else {
-         curr -> next = node;
-       }  
-       curr = node;
-     }
-     if (r != PWM_OK) {
-       pwm_free(*pwm); 
-       *pwm = NULL;
-     }
-     fclose(f);
-  }
+    pwn_derive_key(password, (*pwm)->key);
+    unsigned char iv[AES_IV];
+    unsigned char tag[AES_TAG];
+    int ciphertext_len = 0;
+
+    if ((fread(iv, 1, AES_IV, f) != AES_IV) || (fread(tag, 1, AES_TAG, f) != AES_TAG) || 
+        (fread(&ciphertext_len, sizeof(int), 1, f) != 1)) {
+        
+      pwm_error("Metadata wrong!");
+      pwm_free(*pwm);
+      *pwm = NULL;
+      fclose(f);
+      return PWM_FILE_CORRUPT;
+    }
+
+    unsigned char* ciphertext = malloc(ciphertext_len);
+    if (!ciphertext) {
+      pwm_free(*pwm);
+      *pwm = NULL;
+      fclose(f);
+      return PWM_MEMORY_ALLOCATION_ERROR;
+    }
+    if (fread(ciphertext, 1, ciphertext_len, f) != ciphertext_len) {
+      pwm_error("Corrupted file!");
+      free(ciphertext);
+      pwm_free(*pwm);
+      *pwm = NULL;
+      fclose(f);
+      return PWM_FILE_CORRUPT;
+    }
+    fclose(f); // Fechar o ficheiro logo após a leitura do ciphertext
+
+    // comeca a decifrar
+    unsigned char* plaintext = malloc(ciphertext_len + 1); // +1 para o terminador nulo '\0'
+    if (!plaintext) {
+      free(ciphertext);
+      pwm_free(*pwm);
+      *pwm = NULL;
+      return PWM_MEMORY_ALLOCATION_ERROR;
+    }
+
+    EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+    int len, plaintext_len = 0;
+
+    if (!ctx || EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL) != 1 ||
+        EVP_DecryptInit_ex(ctx, NULL, NULL, (*pwm)->key, iv) != 1) {
+      r = PWM_OS_ERROR;
+    } else {
+      EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, AES_TAG, tag);
+
+      if (EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len) != 1) {
+        r = PWM_PASSWORD_MISMATCH; 
+      } else {
+
+        plaintext_len = len;
+        if (EVP_DecryptFinal_ex(ctx, plaintext + len, &len) != 1) {
+          r = PWM_PASSWORD_MISMATCH;
+        } else {
+          plaintext_len += len;
+          plaintext[plaintext_len] = '\0';
+        }
+      }
+    }
+
+    if (ctx) 
+      EVP_CIPHER_CTX_free(ctx);
+    free(ciphertext);
+
+    if (r != PWM_OK) {
+      free(plaintext);
+      pwm_free(*pwm);
+      *pwm = NULL;
+      pwm_error("Decryption failed! Wrong password or corrupted file.");
+      return r;
+    }
+
+    char line[1024];
+    int count = 0;
+    pwm_node_t* curr = NULL;
+    char* line_start = (char*) plaintext;
+    char* line_end;
+
+    while (line_start != NULL && *line_start != '\0') {
+      line_end = strchr(line_start, '\n');
+      size_t line_length = line_end ? (size_t)(line_end - line_start) : strlen(line_start);
+      
+      if (line_length >= sizeof(line)) {
+        r = PWM_FILE_CORRUPT;
+        pwm_error("Corrupted file! Line too long.");
+        break;
+      }
+      strncpy(line, line_start, line_length);
+      line[line_length] = '\0';
+      line_start = line_end ? (line_end + 1) : NULL;
+      char* line_fields[3];
+      char* user, *salt_str, *hash_str;
+      salt_t salt;
+      hash_t hash;
+      pwm_node_t* node;
+      count++;
+      if (pwm_split_line(line, ':', line_fields, 3) != 3) {
+        r = PWM_FILE_CORRUPT;
+        pwm_error("Corrupted file! Wrong line format.");
+        break;
+      }
+      user = line_fields[0];
+      salt_str = line_fields[1];
+      hash_str = line_fields[2];
+
+      if (! pwm_decode_hex_string(salt_str, salt, sizeof(salt_t))) {
+        pwm_error("Corrupt file '%s' at line %d [salt] !", (*pwm)->file, count);
+        r = PWM_FILE_CORRUPT;
+        break;
+      }
+      if (! pwm_decode_hex_string(hash_str, hash, sizeof(hash_t))) {
+        pwm_error("Corrupt file '%s' at line %d [hash] !", (*pwm)->file, count);
+        r = PWM_FILE_CORRUPT;
+        break;
+      }
+      node = create_node(user, salt, hash);
+      if (count == 1) {
+        hash_t vhash;
+        pwm_hash_password(node -> user, node -> salt, password, vhash);
+        if (memcmp(node -> hash, vhash, sizeof(hash_t)) != 0) {
+          r = PWM_PASSWORD_MISMATCH;
+          pwm_error("Password mismatch for admin user!");
+          free(node);
+          break;
+        }
+        if (strcmp(node->user, PWM_ADMIN_USER) != 0) {
+          r = PWM_FILE_CORRUPT;
+          pwm_error("First entry is not admin user!");
+          free(node);
+          break;
+        }
+        (*pwm) -> entries = node;
+      } else {
+        curr -> next = node;
+      }  
+      curr = node;
+    }
+
+    free(plaintext); // Liberta o plaintext FORA do ciclo while
+    if (r != PWM_OK) {
+      pwm_free(*pwm); 
+      *pwm = NULL;
+    }
+  }    
   return r; 
 }
 
@@ -219,22 +317,116 @@ pwm_res_t pwm_delete(PWM pwm, char* user) {
 }
 
 pwm_res_t pwm_save(PWM pwm) {
-  FILE* f = fopen(pwm -> file, "w");
-  if (!f) {
-    perror(pwm -> file);
-    pwm_error("Could not open file '%s' for writing!", pwm -> file);
-    return PWM_IO_ERROR;
+  //parte da AEAD
+  size_t buffer_size = 1024;
+  char* plaintext = malloc(buffer_size);
+  if (plaintext == NULL) {
+    pwm_error("Could not allocate memory!");
+    return PWM_MEMORY_ALLOCATION_ERROR;
   }
+  size_t offset = 0;
+  plaintext[0] = '\0';
+
   pwm_node_t* node = pwm -> entries;
   while (node != NULL) {
-    fprintf(f, "%s:", node -> user);
-    pwm_print_hex_string(f, node -> salt, sizeof(salt_t));
-    fputc(':', f);
-    pwm_print_hex_string(f, node -> hash, sizeof(hash_t));
-    fputc('\n', f);
+    if(offset + strlen(node -> user) + 1 + 2*sizeof(salt_t) + 1 + 2*sizeof(hash_t) + 1 > buffer_size) {
+      buffer_size *= 2;
+      char* new_plaintext = realloc(plaintext, buffer_size);
+      if (new_plaintext == NULL) {
+        free(plaintext);
+        perror("realloc");
+        pwm_error("Could not allocate memory!");
+        return PWM_MEMORY_ALLOCATION_ERROR;
+      }
+      plaintext = new_plaintext;
+    }
+
+    char salt_hex[2*sizeof(salt_t) + 1];
+    char hash_hex[2*sizeof(hash_t) + 1];
+    pwn_store_hex_string(salt_hex, node -> salt, sizeof(salt_t));
+    pwn_store_hex_string(hash_hex, node -> hash, sizeof(hash_t));
+
+    //adiciona ao buffer user:salt:hash\n
+    offset += sprintf(plaintext + offset, "%s:%s:%s\n", node -> user, salt_hex, hash_hex);
     node = node -> next;
   } 
+
+  unsigned char iv[AES_IV];
+  unsigned char tag[AES_TAG];
+  unsigned char* ciphertext = malloc(offset);
+  if (ciphertext == NULL) {
+    free(plaintext);
+    perror("malloc");
+    pwm_error("Could not allocate memory!");
+    return PWM_MEMORY_ALLOCATION_ERROR;
+  }
+
+  if(RAND_bytes(iv, sizeof(iv)) != 1) {
+    free(plaintext);
+    free(ciphertext);
+    return PWM_OS_ERROR;
+  }
+
+  int len, ciphertext_len = 0;
+  //aead com AES-GCM
+  EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
+  if(!ctx) {
+    free(plaintext);
+    free(ciphertext);
+    return PWM_OS_ERROR;
+  }
+
+  if (EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL) != 1 ||
+      EVP_EncryptInit_ex(ctx, NULL, NULL, pwm->key, iv) != 1) {
+    EVP_CIPHER_CTX_free(ctx);
+    free(plaintext);
+    free(ciphertext);
+    return PWM_OS_ERROR;
+  }
+
+  // Cifrar os dados
+  if (EVP_EncryptUpdate(ctx, ciphertext, &len, (unsigned char*)plaintext, offset) != 1) {
+    EVP_CIPHER_CTX_free(ctx);
+    free(plaintext);
+    free(ciphertext);
+    return PWM_OS_ERROR;
+  }
+  ciphertext_len = len;
+
+  if (EVP_EncryptFinal_ex(ctx, ciphertext + len, &len) != 1) {
+    EVP_CIPHER_CTX_free(ctx);
+    free(plaintext);
+    free(ciphertext);
+    return PWM_OS_ERROR;
+  }
+  ciphertext_len += len;
+
+  // tag de autenticação 
+  if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, AES_TAG, tag) != 1) {
+    EVP_CIPHER_CTX_free(ctx);
+    free(plaintext);
+    free(ciphertext);
+    return PWM_OS_ERROR;
+  }
+
+  EVP_CIPHER_CTX_free(ctx);
+  free(plaintext);
+
+  FILE* f = fopen(pwm->file, "wb");
+  if (!f) {
+    perror(pwm->file);
+    free(ciphertext);
+    pwm_error("Could not open file '%s' for writing!", pwm->file);
+    return PWM_IO_ERROR;
+  }
+  // Escreve os metadados 
+  fwrite(iv, 1, AES_IV, f);                    // IV (12 bytes)
+  fwrite(tag, 1, AES_TAG, f);                  // Tag (16 bytes)
+  fwrite(&ciphertext_len, sizeof(int), 1, f);   // Tamanho do texto cifrado
+  fwrite(ciphertext, 1, ciphertext_len, f);    // Texto cifrado
+
   fclose(f);
+  free(ciphertext);
   return PWM_OK; 
 }
 
