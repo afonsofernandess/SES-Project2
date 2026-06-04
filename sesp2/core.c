@@ -249,6 +249,11 @@ pwm_res_t pwm_update(PWM pwm, char* user, char* password) {
            && (r = pwm_hash_password(user, salt, password, hash)) == PWM_OK) {
           memcpy(node -> salt, salt, sizeof(salt));
           memcpy(node -> hash, hash, sizeof(hash));
+
+          // se for o admin, temos que mudar a chave de encript tambem 
+          if (strcmp(user, PWM_ADMIN_USER) == 0) {
+            pwn_derive_key(password, pwm->key);
+          }
         }
         break;
       }
