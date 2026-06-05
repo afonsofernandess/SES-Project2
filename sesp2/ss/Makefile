@@ -2,9 +2,10 @@
 CC=gcc
 CFLAGS=-g -Wall -std=c11 \
        -D_XOPEN_SOURCE=500 -D_GNU_SOURCE \
-       -fno-asynchronous-unwind-tables
+       -fno-asynchronous-unwind-tables \
+       -I..
 
-LDFLAGS=-lbsd -fno-asynchronous-unwind-tables
+LDFLAGS=-lbsd -lcrypto -fno-asynchronous-unwind-tables
 
 # Executable code on the stack?
 NOXSTACK=0
@@ -32,7 +33,7 @@ else
   LDFLAGS += -pie 
 endif
 
-PWM_SRCS=../pwm.c ../commands.c ../core.c ../utils.c ../md5.c ../validation.c dump_stack.c
+PWM_SRCS=../pwm.c commands.c ../core.c ../utils.c ../md5.c ../validation.c dump_stack.c
 
 PROGRAMS=pwm sc_exec hello
 
